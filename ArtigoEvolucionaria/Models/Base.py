@@ -2,8 +2,8 @@ import random
 
 class Base:
     """ Representa a 'Base' do GAADT: um único inimigo. """
-    def __init__(self):
-        self.letter = self.generate_base()
+    def __init__(self, letter=None):
+        self.letter = self.generate_base() if letter is None else letter
         self.difficulty = self.get_difficulty()
 
     def generate_base(self):
@@ -23,6 +23,7 @@ class Base:
         elif self.letter == 'W': return 5
         elif self.letter == 'T': return 10
         elif self.letter == 'B': return 35
+        elif self.letter == '_': return 0
         else: return 0
 
     def __str__(self):

@@ -36,6 +36,26 @@ class Gene:
     def bear_count(self):
         return self.enemy_letters.count('B')
 
+    # --- Métodos de Comparação e Hash ---
+    
+    def __eq__(self, other):
+        """
+        Compara dois genes baseado no conteúdo (letras dos inimigos).
+        Permite que sets façam comparação profunda.
+        """
+        if not isinstance(other, Gene):
+            return False
+        # Compara as letras dos inimigos (ordenadas para garantir consistência)
+        return sorted(self.enemy_letters) == sorted(other.enemy_letters)
+    
+    def __hash__(self):
+        """
+        Gera hash baseado no conteúdo (letras dos inimigos).
+        Permite que genes possam ser usados em sets e dicionários.
+        """
+        # Usa tupla ordenada das letras para garantir consistência
+        return hash(tuple(sorted(self.enemy_letters)))
+
     # --- Métodos Estáticos (Fábricas) para gerar Genes Válidos ---
     
     @staticmethod

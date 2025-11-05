@@ -18,17 +18,16 @@ if __name__ == "__main__":
     
     # --- 1. Geração do Mapa (Ambiente) ---
     print("Gerando layout do mapa...")
-    map_instance = Map(mapWidth=40, mapHeight=40, minRoomWidth=6, minRoomHeight=6, offset=1)
+    map_instance = Map(mapWidth=40, mapHeight=40, minRoomWidth=10, minRoomHeight=10, offset=1)
     rooms, corridors = map_instance.generate_map()
-    
     # O número de salas define o número de genes no cromossomo
     num_salas = len(rooms)
     print(f"Mapa gerado com {num_salas} salas.")
     
-    # Visualiza o mapa VAZIO (opcional)
-    # print("Visualizando mapa vazio...")
-    # map_instance.visualize_map(rooms, corridors)
-    # plt.show()
+    #Visualiza o mapa VAZIO (opcional)
+    print("Visualizando mapa vazio...")
+    map_instance.visualize_map(rooms, corridors)
+    plt.show()
 
 
     # --- 2. Configuração do Algoritmo Genético ---
@@ -38,6 +37,7 @@ if __name__ == "__main__":
     CROSSOVER_RATE = 0.8         # 80% de chance de gerar filhos (vs. clonar pais)
     ELITISM_COUNT = 2            # Os 2 melhores indivíduos passam direto para a próxima geração
     GENERATIONS = 100            # Quantas gerações rodar
+    PERFECT_FITNESS = 30         # Fitness que reflete a dificuldade escolhida pelo usuário (FÁCIL = 20, MÉDIO = 40, DIFÍCIL = 60)
 
     # --- 3. Execução do Loop de Evolução ---
     ga = GeneticAlgorithm(
@@ -45,7 +45,8 @@ if __name__ == "__main__":
         gene_count=GENE_COUNT,
         mutation_rate=MUTATION_RATE,
         crossover_rate=CROSSOVER_RATE,
-        elitism_count=ELITISM_COUNT
+        elitism_count=ELITISM_COUNT,
+        perfect_fitness=PERFECT_FITNESS
     )
     
     # Roda a evolução
