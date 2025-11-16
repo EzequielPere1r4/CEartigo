@@ -1,7 +1,9 @@
 import random
+from functools import total_ordering
 from math import fabs
 from Models.Gene import Gene
 
+@total_ordering
 class Chromosome:
     """
     Representa o 'Cromossomo' do GAADT: um conjunto de Genes (salas).
@@ -28,6 +30,10 @@ class Chromosome:
         self.perfect_fitness = perfect_fitness
         self.fitness = self.calculate_fitness(perfect_fitness)
         
+
+    @property
+    def difficulty_mean(self):
+        return sum(gene.difficulty for gene in self.genes) / len(self.genes) if len(self.genes) > 0 else 0
 
     def generate_valid_chromosome(self):
         """
@@ -62,7 +68,7 @@ class Chromosome:
         for gene in self.genes:
             total_difficulty += gene.difficulty
         if fabs((total_difficulty / len(self.genes)) - perfect_fitness) == 0:
-            fitness = 1
+            fitness = 10
         else:
             fitness = 1 / fabs((total_difficulty / len(self.genes)) - perfect_fitness)
 
@@ -77,4 +83,12 @@ class Chromosome:
     
     def __lt__(self, other):
         """ Permite ordenar cromossomos por fitness. """
+        if not isinstance(other, Chromosome):
+            return NotImplemented
         return self.fitness < other.fitness
+    
+    def __eq__(self, other):
+        """ Compara dois cromossomos por fitness. """
+        if not isinstance(other, Chromosome):
+            return NotImplemented
+        return self.fitness == other.fitness

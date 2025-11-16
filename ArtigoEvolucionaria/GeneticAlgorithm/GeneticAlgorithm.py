@@ -42,8 +42,6 @@ class GeneticAlgorithm:
         # Realizar a seleção dos melhores cromossomos
         child_population = self.fertilization(parent1, parent2)
 
-        print("saiu do fertilization")
-
         for child in child_population:
             if child.fitness > parent1.fitness or child.fitness > parent2.fitness:
                 self.population.chromosomes.append(child)
@@ -59,21 +57,14 @@ class GeneticAlgorithm:
 
         for gene in parent1.genes:
             for gene2 in parent2.genes:
-                print("comparou os genes 1x")
                 child_genes.add(self.dominant_gene_comparator(gene, gene2))
-        print("saiu da geração de novos genes")
-        print(f"len(child_genes): {len(child_genes)}")
         # Converte o set para lista para poder trabalhar com índices
         child_genes_list = list(child_genes)
-        print("saiu da conversão para lista")
-        print(f"len(child_genes_list): {len(child_genes_list)}")
         
         # Separa genes com urso dos genes sem urso
         bear_genes = [g for g in child_genes_list if g.bear_count == 1]
         non_bear_genes = [g for g in child_genes_list if g.bear_count == 0]
-        print("saiu da separação de genes com urso e sem urso")
-        print(f"len(bear_genes): {len(bear_genes)}")
-        print(f"len(non_bear_genes): {len(non_bear_genes)}")
+
         # Gera todas as combinações válidas de cromossomos
         # Cada cromossomo deve ter exatamente 1 gene com urso e (gene_count - 1) genes sem urso
         remaining_slots = self.gene_count - 1  # Quantos slots restam após colocar o urso
@@ -97,8 +88,10 @@ class GeneticAlgorithm:
         retorna o melhor deles (o vencedor do torneio).
         """
         if mutation:
+            # Retorna os últimos N elementos da população (os piores)
             return copy.deepcopy(self.population.chromosomes[subpopulation_size:])
         else:
+            # Retorna os primeiros N elementos da população (os melhores)
             return copy.deepcopy(self.population.chromosomes[:subpopulation_size])
 
 
@@ -129,6 +122,7 @@ class GeneticAlgorithm:
 
         self.population.chromosomes = sorted(self.population.chromosomes, reverse=True)
         subpopulation_size = self.population_size // 10 if (self.population_size // 10) % 2 == 0 else self.population_size // 10 + 1
+        #subpopulation_size = 10
 
         mutation_population = self.selection(subpopulation_size, mutation = True)
         
@@ -136,16 +130,9 @@ class GeneticAlgorithm:
         male_crossover_population = crossover_population[:len(crossover_population)//2]
         female_crossover_population = crossover_population[len(crossover_population)//2:]
 
-        print("funcionou antes do crossover")
-        print(len(male_crossover_population))
-        print(len(female_crossover_population))
-
         for i in range(len(male_crossover_population)):
             if random.random() < self.crossover_rate:
-                print("entrou no random 1x")
                 self.crossover(male_crossover_population[i], female_crossover_population[i])
-        
-        print("funcionou até aqui 3")
         
         for chromosome in mutation_population:
             if random.random() < self.mutation_rate:
@@ -164,14 +151,13 @@ class GeneticAlgorithm:
         avg_fitness_history = []
         
         initial_best = self.population.get_best_chromosome()
-        print(f"Geração 0: Melhor Fitness = {initial_best.fitness:.2f}")
+        print(f"Geração 0: pop_size: {self.population.population_size}: Dificuldade Média = {initial_best.difficulty_mean:.2f} | Melhor Fitness = {initial_best.fitness:.2f}")
+        gen = 0
 
-        while self.population.get_best_chromosome().fitness < 0.9:
-            i = 0
-                        # Roda uma geração
-            print("funcionou até aqui")
+        while self.population.get_best_chromosome().fitness < 10 and gen < generations:
+        
+            # Roda uma geração
             self.evolve()
-            print("funcionou até aqui 2")
 
             # Coleta estatísticas
             best_chromosome = self.population.get_best_chromosome()
@@ -180,9 +166,9 @@ class GeneticAlgorithm:
             best_fitness_history.append(best_chromosome.fitness)
             avg_fitness_history.append(avg_fitness)
             
-            # if g % 10 == 0 or g == generations:
-            print(f"Geração {i+1}: Melhor Fitness = {best_chromosome.fitness:.2f} | Média Fitness = {avg_fitness:.2f}")
-            i += 1
+            if gen % 10 == 0 or gen == generations or gen < 10 or best_chromosome.fitness == 10:
+                print(f"Geração {gen} pop_size: {self.population.population_size}: Dificuldade Média = {best_chromosome.difficulty_mean:.2f} | Melhor Fitness = {best_chromosome.fitness:.2f} | Média Fitness = {avg_fitness:.2f}")
+            gen += 1
                
         
         # for g in range(1, generations + 1):
@@ -195,10 +181,8 @@ class GeneticAlgorithm:
             
         #     best_fitness_history.append(best_chromosome.fitness)
         #     avg_fitness_history.append(avg_fitness)
-            
-        #     if g % 10 == 0 or g == generations:
-        #         print(f"Geração {g}: Melhor Fitness = {best_chromosome.fitness:.2f} | Média Fitness = {avg_fitness:.2f}")
-                
+        #     if g % 10 == 0 or g == generations or g < 10:
+        #         print(f"Geração {g} pop_size: {self.population.population_size}: Dificuldade Média = {best_chromosome.difficulty_mean:.2f} | Melhor Fitness = {best_chromosome.fitness:.2f} | Média Fitness = {avg_fitness:.2f}")
         print("--- Evolução Concluída ---")
         
         # Retorna o melhor indivíduo encontrado e o histórico
