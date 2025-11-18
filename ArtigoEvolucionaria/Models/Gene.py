@@ -31,10 +31,48 @@ class Gene:
     @property
     def difficulty(self):
         return sum(enemy.difficulty for enemy in self.enemies)
+
+    @property
+    def difficulty_mean(self):
+        return self.difficulty / len(self.enemies) if len(self.enemies) > 0 else 0
     
     @property
     def bear_count(self):
         return self.enemy_letters.count('B')
+
+    @property
+    def fenotype(self):
+        fenotype = [0, 0, 0, 0]
+        for enemy in self.enemies:
+            if enemy.letter == 'G':
+                fenotype[0] += 1
+            elif enemy.letter == 'W':
+                fenotype[1] += 1
+            elif enemy.letter == 'T':
+                fenotype[2] += 1
+            elif enemy.letter == 'B':
+                fenotype[3] += 1
+        return fenotype
+
+    # --- Métodos de Comparação e Hash ---
+    
+    def __eq__(self, other):
+        """
+        Compara dois genes baseado no conteúdo (letras dos inimigos).
+        Permite que sets façam comparação profunda.
+        """
+        if not isinstance(other, Gene):
+            return False
+        # Compara as letras dos inimigos (ordenadas para garantir consistência)
+        return sorted(self.enemy_letters) == sorted(other.enemy_letters)
+    
+    def __hash__(self):
+        """
+        Gera hash baseado no conteúdo (letras dos inimigos).
+        Permite que genes possam ser usados em sets e dicionários.
+        """
+        # Usa tupla ordenada das letras para garantir consistência
+        return hash(tuple(sorted(self.enemy_letters)))
 
     # --- Métodos Estáticos (Fábricas) para gerar Genes Válidos ---
     

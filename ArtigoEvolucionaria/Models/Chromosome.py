@@ -1,6 +1,9 @@
 import random
+from functools import total_ordering
+from math import fabs
 from Models.Gene import Gene
 
+@total_ordering
 class Chromosome:
     """
     Representa o 'Cromossomo' do GAADT: um conjunto de Genes (salas).
@@ -11,7 +14,7 @@ class Chromosome:
     EXACTLY_N_BEARS = 1 # Deve haver exatamente 1 Urso no mapa todo
     # --------------------------------------
     
-    def __init__(self, gene_count, genes_list=None):
+    def __init__(self, gene_count, perfect_fitness, genes_list=None):
         """
         Cria um Cromossomo.
         :param gene_count: O número total de genes (salas) que este cromossomo deve ter.
@@ -24,7 +27,19 @@ class Chromosome:
         else:
             self.genes = self.generate_valid_chromosome()
             
-        self.fitness = self.calculate_fitness()
+        self.perfect_fitness = perfect_fitness
+        self.fitness = self.calculate_fitness(perfect_fitness)
+        
+    @property
+    def fenotype(self):
+        fenotype = []
+        for gene in self.genes:
+            fenotype.append(gene.fenotype)
+        return fenotype
+
+    @property
+    def difficulty_mean(self):
+        return sum(gene.difficulty for gene in self.genes) / len(self.genes) if len(self.genes) > 0 else 0
 
     def generate_valid_chromosome(self):
         """
@@ -48,29 +63,36 @@ class Chromosome:
         random.shuffle(genes)
         return genes
 
-    def calculate_fitness(self):
+    def calculate_fitness(self, perfect_fitness):
         """
         Função de Adaptação: Mede o quão "bom" é este Cromossomo.
-        (Média da dificuldade das salas SEM o Urso)
+        A melhor fitness é aquela que diminui a diferença entre a média da dificuldade das salas e a dificuldade perfeita.
         """
         total_difficulty = 0
-        non_bear_gene_count = 0
-        
+        fitness = 0
+
         for gene in self.genes:
-            if gene.bear_count == 0:
-                total_difficulty += gene.difficulty
-                non_bear_gene_count += 1
-                
-        if non_bear_gene_count == 0:
-            return 0 # Evita divisão por zero
-            
-        # O objetivo é maximizar a dificuldade média das salas normais
-        return total_difficulty / non_bear_gene_count
+            total_difficulty += gene.difficulty
+
+        fitness = 1 / (1 + fabs((total_difficulty / len(self.genes)) - perfect_fitness))
+
+        return fitness
 
     def __repr__(self):
+        total_difficulty = 0
+        for gene in self.genes:
+            total_difficulty += gene.difficulty
         gene_info = "\n".join(f"  # {i+1}: {gene}" for i, gene in enumerate(self.genes))
-        return f"Cromossomo(Fitness: {self.fitness:.2f}, Genes: {len(self.genes)})\n{gene_info}"
+        return f"Cromossomo(Dificuldade Média: {total_difficulty / len(self.genes):.2f}, Fitness: {self.fitness:.2f}, Genes: {len(self.genes)})\n{gene_info}"
     
     def __lt__(self, other):
         """ Permite ordenar cromossomos por fitness. """
+        if not isinstance(other, Chromosome):
+            return NotImplemented
         return self.fitness < other.fitness
+    
+    def __eq__(self, other):
+        """ Compara dois cromossomos por fitness. """
+        if not isinstance(other, Chromosome):
+            return NotImplemented
+        return self.fitness == other.fitness
