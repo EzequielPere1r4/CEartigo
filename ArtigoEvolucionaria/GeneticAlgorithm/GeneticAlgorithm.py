@@ -57,7 +57,12 @@ class GeneticAlgorithm:
 
         for gene in parent1.genes:
             for gene2 in parent2.genes:
-                child_genes.add(self.dominant_gene_comparator(gene, gene2))
+                dominant_gene = self.dominant_gene_comparator(gene, gene2)
+                # Filtra genes inválidos (genes com Base('_') ou que não atendem aos AFG)
+                if dominant_gene.bear_count >= 0 and len(dominant_gene.enemies) >= Gene.MIN_ENEMIES:
+                    # Verifica se o gene atende aos AFG
+                    if Gene._validate_gene_static(dominant_gene.enemies):
+                        child_genes.add(dominant_gene)
         # Converte o set para lista para poder trabalhar com índices
         child_genes_list = list(child_genes)
         
@@ -89,7 +94,7 @@ class GeneticAlgorithm:
         """
         if mutation:
             # Retorna os últimos N elementos da população (os piores)
-            return copy.deepcopy(self.population.chromosomes[subpopulation_size:])
+            return copy.deepcopy(self.population.chromosomes[-subpopulation_size:])
         else:
             # Retorna os primeiros N elementos da população (os melhores)
             return copy.deepcopy(self.population.chromosomes[:subpopulation_size])
@@ -154,7 +159,7 @@ class GeneticAlgorithm:
         print(f"Geração 0: pop_size: {self.population.population_size}: Dificuldade Média = {initial_best.difficulty_mean:.2f} | Melhor Fitness = {initial_best.fitness:.2f}")
         gen = 0
 
-        while self.population.get_best_chromosome().fitness < 10 and gen < generations:
+        while self.population.get_best_chromosome().fitness < 1 and gen < generations:
         
             # Roda uma geração
             self.evolve()
@@ -166,8 +171,8 @@ class GeneticAlgorithm:
             best_fitness_history.append(best_chromosome.fitness)
             avg_fitness_history.append(avg_fitness)
             
-            if gen % 10 == 0 or gen == generations or gen < 10 or best_chromosome.fitness == 10:
-                print(f"Geração {gen} pop_size: {self.population.population_size}: Dificuldade Média = {best_chromosome.difficulty_mean:.2f} | Melhor Fitness = {best_chromosome.fitness:.2f} | Média Fitness = {avg_fitness:.2f}")
+            if gen % 10 == 0 or gen == generations or gen < 10 or best_chromosome.fitness == 1:
+                print(f"Geração {gen + 1} pop_size: {self.population.population_size}: Dificuldade Média = {best_chromosome.difficulty_mean:.2f} | Melhor Fitness = {best_chromosome.fitness:.2f} | Média Fitness = {avg_fitness:.2f}")
             gen += 1
                
         

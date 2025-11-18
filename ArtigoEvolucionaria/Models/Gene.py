@@ -31,10 +31,28 @@ class Gene:
     @property
     def difficulty(self):
         return sum(enemy.difficulty for enemy in self.enemies)
+
+    @property
+    def difficulty_mean(self):
+        return self.difficulty / len(self.enemies) if len(self.enemies) > 0 else 0
     
     @property
     def bear_count(self):
         return self.enemy_letters.count('B')
+
+    @property
+    def fenotype(self):
+        fenotype = [0, 0, 0, 0]
+        for enemy in self.enemies:
+            if enemy.letter == 'G':
+                fenotype[0] += 1
+            elif enemy.letter == 'W':
+                fenotype[1] += 1
+            elif enemy.letter == 'T':
+                fenotype[2] += 1
+            elif enemy.letter == 'B':
+                fenotype[3] += 1
+        return fenotype
 
     # --- Métodos de Comparação e Hash ---
     

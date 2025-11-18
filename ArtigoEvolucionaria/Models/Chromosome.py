@@ -30,6 +30,12 @@ class Chromosome:
         self.perfect_fitness = perfect_fitness
         self.fitness = self.calculate_fitness(perfect_fitness)
         
+    @property
+    def fenotype(self):
+        fenotype = []
+        for gene in self.genes:
+            fenotype.append(gene.fenotype)
+        return fenotype
 
     @property
     def difficulty_mean(self):
@@ -67,10 +73,8 @@ class Chromosome:
 
         for gene in self.genes:
             total_difficulty += gene.difficulty
-        if fabs((total_difficulty / len(self.genes)) - perfect_fitness) == 0:
-            fitness = 10
-        else:
-            fitness = 1 / fabs((total_difficulty / len(self.genes)) - perfect_fitness)
+
+        fitness = 1 / (1 + fabs((total_difficulty / len(self.genes)) - perfect_fitness))
 
         return fitness
 
